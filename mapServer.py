@@ -4,6 +4,8 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import Response
+from flask import render_template
+
 from werkzeug import secure_filename
 
 import sys
@@ -80,6 +82,29 @@ def addMapViaUpload():
 		return Response(status=201)
 
 	return Response(response='{error: "Invalid file extension"}', status=400)
+
+@app.route('/maps/upload', methods=['GET'])
+def getMapUploadForm():
+	return render_template('uploadFile.html')
+
+@app.route('/maps/upload', methods=['POST'])
+def addMapViaUIUpload():
+	file = request.files['file']
+	mapName = file.filename
+
+	currentMaps = getCurrentMaps()
+	if mapName in currentMaps:
+		return Response(status=204)
+
+	if file and allowed_file(mapName):
+		filename = secure_filename(mapName)
+
+		mapsDir = deploymentOptions['mapsDir']
+		file.save(join(mapsDir, filename))
+
+		return render_template('uploadSuccessful.html')
+
+	return render_template('uploadFailed.html')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Simple web server for listing maps in a given directory')
