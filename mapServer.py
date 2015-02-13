@@ -4,6 +4,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import Response
+from werkzeug import secure_filename
 
 import sys
 import urllib
@@ -21,6 +22,8 @@ configOptions = {
 }
 
 deploymentOptions = {}
+
+ALLOWED_EXTENSIONS = set(['bsp', 'bsp.bz2'])
 
 def getCurrentMaps():
 	maps = {
@@ -58,6 +61,27 @@ def addMap():
 	mapsDir = deploymentOptions['mapsDir']
 	testfile = urllib.URLopener()
 	testfile.retrieve(data['mapUrl'], join(mapsDir,data['mapName']))
+
+	return Response(status=201)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+@app.route('/maps/add/upload', methods=['POST'])
+def addMapViaUpload():
+	file = request.files['file']
+	mapName = file.filename
+	data = request.data
+
+	currentMaps = getCurrentMaps()
+	if mapName in currentMaps['uncompressed']:
+		return Response(status=204)
+
+	if file and allowed_file(mapName):
+		filename = secure_filename(mapName)
+
+		mapsDir = deploymentOptions['mapsDir']
+		file.save(join(mapsDir, filename))
 
 	return Response(status=201)
 
