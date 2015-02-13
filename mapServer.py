@@ -71,7 +71,6 @@ def allowed_file(filename):
 def addMapViaUpload():
 	file = request.files['file']
 	mapName = file.filename
-	data = request.data
 
 	currentMaps = getCurrentMaps()
 	if mapName in currentMaps['uncompressed']:
