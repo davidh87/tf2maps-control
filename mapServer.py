@@ -22,8 +22,7 @@ configOptions = {
 
 deploymentOptions = {}
 
-@app.route('/maps', methods=['GET'])
-def listMaps():
+def getCurrentMaps():
 	maps = {
 		'uncompressed': [],
 		'compressed': []
@@ -38,7 +37,11 @@ def listMaps():
 		elif f.endswith('.bsp.bz2'):
 			maps['compressed'].append(f)
 
-	return jsonify(maps)
+	return maps
+
+@app.route('/maps', methods=['GET'])
+def listMaps():
+	return jsonify(getCurrentMaps())
 
 @app.route('/maps/add/url', methods=['POST'])
 def addMap():
@@ -48,12 +51,15 @@ def addMap():
 	elif 'mapUrl' not in data:
 		return Response(response='{error: "Missing required parameter - mapUrl"}', status=400)
 
+	currentMaps = getCurrentMaps()
+	if data['mapName'] in currentMaps['uncompressed']:
+		return Response(status=204)
+
 	mapsDir = deploymentOptions['mapsDir']
 	testfile = urllib.URLopener()
 	testfile.retrieve(data['mapUrl'], join(mapsDir,data['mapName']))
 
-	return Response(status=204)
-
+	return Response(status=201)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Simple web server for listing maps in a given directory')
