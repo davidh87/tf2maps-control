@@ -23,28 +23,23 @@ configOptions = {
 
 deploymentOptions = {}
 
-ALLOWED_EXTENSIONS = set(['bsp', 'bsp.bz2'])
+ALLOWED_EXTENSIONS = set(['bsp'])
 
 def getCurrentMaps():
-	maps = {
-		'uncompressed': [],
-		'compressed': []
-	}
+	maps = []
 
 	mapsDir = deploymentOptions['mapsDir']
 	for f in listdir(mapsDir):
 		if not isfile(join(mapsDir, f)):
 			continue
 		if f.endswith('.bsp'):
-			maps['uncompressed'].append(f)
-		elif f.endswith('.bsp.bz2'):
-			maps['compressed'].append(f)
+			maps.append(f)
 
 	return maps
 
 @app.route('/maps', methods=['GET'])
 def listMaps():
-	return jsonify(getCurrentMaps())
+	return jsonify({'maps':getCurrentMaps()})
 
 @app.route('/maps/add/url', methods=['POST'])
 def addMap():
@@ -55,7 +50,7 @@ def addMap():
 		return Response(response='{error: "Missing required parameter - mapUrl"}', status=400)
 
 	currentMaps = getCurrentMaps()
-	if data['mapName'] in currentMaps['uncompressed']:
+	if data['mapName'] in currentMaps:
 		return Response(status=204)
 
 	mapsDir = deploymentOptions['mapsDir']
@@ -73,7 +68,7 @@ def addMapViaUpload():
 	mapName = file.filename
 
 	currentMaps = getCurrentMaps()
-	if mapName in currentMaps['uncompressed']:
+	if mapName in currentMaps:
 		return Response(status=204)
 
 	if file and allowed_file(mapName):
@@ -82,7 +77,9 @@ def addMapViaUpload():
 		mapsDir = deploymentOptions['mapsDir']
 		file.save(join(mapsDir, filename))
 
-	return Response(status=201)
+		return Response(status=201)
+
+	return Response(response='{error: "Invalid file extension"}', status=400)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Simple web server for listing maps in a given directory')
