@@ -43,6 +43,17 @@ def getCurrentMaps():
 def listMaps():
 	return jsonify({'maps':getCurrentMaps()})
 
+def addMapFromUrl(mapName, mapUrl):
+	currentMaps = getCurrentMaps()
+	if mapName in currentMaps:
+		return False
+
+	mapsDir = deploymentOptions['mapsDir']
+	testfile = urllib.URLopener()
+	testfile.retrieve(mapUrl, join(mapsDir,mapName))
+
+	return True
+
 @app.route('/maps/add/url', methods=['POST'])
 def addMap():
 	data = request.get_json(force=True)
@@ -51,15 +62,12 @@ def addMap():
 	elif 'mapUrl' not in data:
 		return Response(response='{error: "Missing required parameter - mapUrl"}', status=400)
 
-	currentMaps = getCurrentMaps()
-	if data['mapName'] in currentMaps:
+	result = addMapFromUrl(data['mapName'], data['mapUrl'])
+
+	if result == True:
+		return Response(status=201)
+	else:
 		return Response(status=204)
-
-	mapsDir = deploymentOptions['mapsDir']
-	testfile = urllib.URLopener()
-	testfile.retrieve(data['mapUrl'], join(mapsDir,data['mapName']))
-
-	return Response(status=201)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
