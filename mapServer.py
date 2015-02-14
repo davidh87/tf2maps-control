@@ -20,6 +20,9 @@ app = Flask(__name__)
 configOptions = {
 	'dev': {
 		'mapsDir': '/Users/davidh/Documents/tf2center/mapsDir'
+	},
+	'live': {
+		'mapsDir': '/home/tf2/shared/maps'
 	}
 }
 
