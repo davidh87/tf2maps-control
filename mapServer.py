@@ -136,4 +136,4 @@ if __name__ == '__main__':
 	deploymentOptions = configOptions[args.config[0]]
 
 	app.debug = True
-	app.run()
+	app.run(host='0.0.0.0')
