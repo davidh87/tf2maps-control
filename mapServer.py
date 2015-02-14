@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 
 from flask import Flask
 from flask import jsonify
@@ -130,10 +130,10 @@ def addMapViaUIURL():
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Simple web server for listing maps in a given directory')
-	parser.add_argument('--config', metavar='config', type=str, nargs=1, help='Which config to use', default='dev')
+	parser.add_argument('--config', metavar='config', type=str, nargs=1, help='Which config to use', default=['dev'])
 	
 	args = parser.parse_args()
-	deploymentOptions = configOptions[args.config]
+	deploymentOptions = configOptions[args.config[0]]
 
 	app.debug = True
 	app.run()
