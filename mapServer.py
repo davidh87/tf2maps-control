@@ -66,7 +66,7 @@ def addMap():
 
 	if result == True:
 		return Response(status=201)
-	else:
+	else:	
 		return Response(status=204)
 
 def allowed_file(filename):
@@ -113,6 +113,17 @@ def addMapViaUIUpload():
 		return render_template('uploadSuccessful.html')
 
 	return render_template('uploadFailed.html')
+
+@app.route('/maps/upload/url', methods=['POST'])
+def addMapViaUIURL():
+	mapName = request.form['mapName']
+	mapUrl = request.form['mapUrl']
+
+	result = addMapFromUrl(mapName, mapUrl)
+	if result == True:
+		return render_template('uploadSuccessful.html')
+	else:
+		return render_template('mapExists.html')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Simple web server for listing maps in a given directory')
